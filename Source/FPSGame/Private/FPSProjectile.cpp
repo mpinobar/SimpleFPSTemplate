@@ -3,6 +3,8 @@
 #include "FPSProjectile.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Components/SphereComponent.h"
+#include "Components/PrimitiveComponent.h"
+#include "ABomb.h"
 
 AFPSProjectile::AFPSProjectile() 
 {
@@ -38,6 +40,20 @@ void AFPSProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPr
 	if ((OtherActor != NULL) && (OtherActor != this) && (OtherComp != NULL) && OtherComp->IsSimulatingPhysics())
 	{
 		OtherComp->AddImpulseAtLocation(GetVelocity() * 100.0f, GetActorLocation());
+
+		FVector NewScale = OtherComp->GetComponentScale();
+		NewScale *= 0.75f;
+
+		if (NewScale.X <= 0.25f) {
+			OtherActor->Destroy();
+		}
+		else
+		{
+			
+			OtherComp->SetWorldScale3D(NewScale);
+			UMaterialInstanceDynamic* NewMaterial = OtherComp->CreateAndSetMaterialInstanceDynamic(0);
+			NewMaterial->SetVectorParameterValue("Color", FLinearColor::MakeRandomColor());
+		}
 
 		Destroy();
 	}
